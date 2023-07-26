@@ -1,4 +1,5 @@
 import { Router } from "express";
+import multer from "multer";
 import {
   deleteArchivos,
   getArchivos,
@@ -9,10 +10,14 @@ import {
 
 const router = Router();
 
+// Configuración de Multer para guardar los archivos en la carpeta "uploads"
+const upload = multer({ dest: "uploads/" });
+
 router.get("/archivos", getArchivos);
 router.get("/archivos/:id", getArchivosById);
 
-router.post("/archivos", postArchivos);
+// Agregar el middleware de Multer para el manejo de archivos en la ruta POST
+router.post("/archivos", upload.single("archivo"), postArchivos);
 
 router.patch("/archivos/:id", putArchivos);
 

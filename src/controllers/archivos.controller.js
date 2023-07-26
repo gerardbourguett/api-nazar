@@ -1,4 +1,8 @@
 import { pool } from "../db.js";
+import multer from "multer";
+
+// Configuración de Multer para guardar los archivos en la carpeta "uploads"
+const upload = multer({ dest: "uploads/" });
 
 export const getArchivos = async (req, res) => {
   try {
@@ -28,12 +32,22 @@ export const getArchivosById = async (req, res) => {
   }
 };
 
+// Middleware para el manejo de archivos usando Multer
+export const uploadArchivo = upload.single("archivo");
+
 export const postArchivos = async (req, res) => {
   try {
     const { nombre_archivo, id_empleado } = req.body;
+
+    // Verificar si se ha cargado un archivo y obtener su información
+    let archivoUrl = null;
+    if (req.file) {
+      archivoUrl = req.file.path; // Aquí puedes guardar la URL del archivo en la base de datos o en otro lugar
+    }
+
     const [rows] = await pool.query(
-      "INSERT INTO archivos(nombre_archivo, id_empleado) VALUES (?,?)",
-      [nombre_archivo, id_empleado]
+      "INSERT INTO archivos(nombre_archivo, id_empleado, archivo_url) VALUES (?,?,?)",
+      [nombre_archivo, id_empleado, archivoUrl]
     );
     res.json({ id: rows.insertId, nombre_archivo, id_empleado });
   } catch (error) {
@@ -78,8 +92,8 @@ export const deleteArchivos = async (req, res) => {
     );
     if (result.affectedRows <= 0) {
       return res.status(404).json({ message: "Archivo no encontrado" });
-      res.sendStatus(204);
     }
+    res.sendStatus(204);
   } catch (error) {
     return res.status(500).json({
       message: "Error al eliminar el archivo",
