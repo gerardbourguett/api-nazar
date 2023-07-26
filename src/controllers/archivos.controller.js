@@ -38,7 +38,9 @@ export const postArchivos = async (req, res) => {
     res.json({ id: rows.insertId, nombre_archivo, id_empleado });
   } catch (error) {
     console.error(error);
-    res.sendStatus(500);
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing your request." });
   }
 };
 
